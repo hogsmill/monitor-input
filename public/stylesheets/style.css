@@ -3,6 +3,20 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+h1 {
+  text-align: center;;
+}
+
 a {
   color: #00B7FF;
+}
+
+.form-group div {
+  height: 24px;
+  width: 100%;
+  text-align: center;
+}
+
+.form-group select {
+  width: 100%;
 }

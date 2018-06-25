@@ -8,12 +8,12 @@ var logger = require('morgan');
 var path = require('path');
 var favicon = require('serve-favicon');
 var port = process.env.PORT || 8080;
-var mongoUri = process.env.MONGOLAB_URI ||
-        process.env.MONGOHQ_URL ||
-        'mongodb://localhost/video';
+var mongoUri =
+  //process.env.MONGOLAB_URI ||
+  //process.env.MONGOHQ_URL ||
+  'mongodb://127.0.0.1:27017/test';
 
 var app = express();
-
 
 // configure our server
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -31,28 +31,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 // make sure we can connect to database before starting server
 MongoClient.connect(mongoUri, function(err, db) {
 
-    assert.equal(null, err);
-    console.log('Successfully connected to mondodb');
+  assert.equal(null, err);
+  console.log('Successfully connected to mondodb');
 
-    app.get('/', function(req, res) {
-        db.collection('movies').find({}).toArray(function(err, docs) {
-            res.render('index', {'movies': docs} );
-        });
+  app.get('/', function(req, res) {
+    db.collection('teams').find({}).toArray(function(err, docs) {
+      var teams = {}
+      var members = []
+      docs.forEach(function(team) {
+        teams[team.team] = 1
+        members.push(team.name)
+      })
+      res.render('index', {
+        'teams': Object.keys(teams),
+        'members': members} );
     });
+  });
 
     app.post('/', function(req, res) {
-        var title = req.body.movieTitle;
-        var year = req.body.movieYear;
-        var imdb = req.body.movieIMDB;
+      var member = req.body.member
+      var status = req.body.status
+      var startDate = req.body.startDate
+      var endDate = req.body.endDate
 
-        db.collection('movies').insertOne({
-                                            title: title,
-                                            year: year,
-                                            imdb: imdb
-                                        }, function(err, doc) {
-                                            assert.equal(null, err);
-                                            res.render('newmovie', {movie: req.body});
-                                        }
+      db.collection('Whereabouts').insertOne({
+                          name: member,
+                          status: status,
+                          start: startDate,
+                          end: endDate
+                        }, function(err, doc) {
+                              assert.equal(null, err);
+                              res.redirect('/')
+                              //res.render('newmovie', {movie: req.body});
+                        }
         );
 
     });
@@ -88,10 +99,8 @@ MongoClient.connect(mongoUri, function(err, db) {
       });
     });
 
-
-
     app.listen(port, function() {
-        console.log('Server listening on port 3000');
+        console.log('Server listening on port ' + port);
     });
 
 });
